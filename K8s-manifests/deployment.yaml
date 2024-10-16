@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynodejs-application
+  namespace: default  # You can change this to your desired namespace
+spec:
+  replicas: 1  # Number of desired pods
+  selector:
+    matchLabels:
+      app: mynodejs-application
+  template:
+    metadata:
+      labels:
+        app: mynodejs-application
+    spec:
+      containers:
+      - name: mynodejs-application
+        image: devops317/mynodejs-application:<BUILD_NUMBER>  # Replace with your image and build number
+        ports:
+        - containerPort: 3000  # Change this to your application's port
+     
+
+   
