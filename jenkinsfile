@@ -39,7 +39,8 @@ pipeline {
                     if ! command -v sonar-scanner &> /dev/null
                     then
                         echo "SonarScanner not found, installing..."
-                        wget -qO- https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip | unzip -d /opt
+                        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+                        unzip sonar-scanner-cli-4.8.0.2856-linux.zip -d /opt
                         export PATH=$PATH:/opt/sonar-scanner-4.8.0.2856-linux/bin
                     else
                         echo "SonarScanner already installed"
