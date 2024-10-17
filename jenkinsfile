@@ -30,6 +30,25 @@ pipeline {
             }
         }
 
+        stage('Static Code Analysis (SonarQube)') {
+            steps {
+                // Run SonarQube analysis
+                script {
+                    withSonarQubeEnv('SonarQube') { // 'SonarQube' should match the name of your SonarQube server configuration in Jenkins
+                        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONARQUBE_AUTH')]) {
+                            sh '''
+                                sonar-scanner \
+                                -Dsonar.projectKey=my-nodejs-app \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://192.168.43.90:9000 \
+                                -Dsonar.login=$SONARQUBE_AUTH
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Build Application') {
             steps {
                 // Build the Node.js application
@@ -50,7 +69,7 @@ pipeline {
             steps {
                 // Use Docker Hub credentials to log in and push the image
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockee-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PWD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PWD')]) {
                         sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                         sh "docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
                     }
