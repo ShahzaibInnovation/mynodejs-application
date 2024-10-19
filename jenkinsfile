@@ -2,33 +2,43 @@ pipeline {
     agent any
 
     environment {
-        // Docker image name
         IMAGE_NAME = 'devops317/mynodejs-application'
-        // Your GitHub repository URL
         GIT_REPO = 'https://github.com/ShahzaibInnovation/mynodejs-application.git'
-        // SonarQube server URL
         SONAR_URL = "http://192.168.43.90:9000"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout code from the GitHub repository
                 git branch: 'main', url: "${GIT_REPO}"
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                // Install Node.js dependencies
                 sh 'npm install'
             }
         }
 
         stage('Unit Test') {
             steps {
-                // Run unit tests using Mocha or any testing framework
                 sh 'npm test'
+            }
+        }
+
+        stage('Install SonarScanner') {
+            steps {
+                sh '''
+                    if ! command -v sonar-scanner &> /dev/null
+                    then
+                        echo "SonarScanner not found, installing..."
+                        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
+                        unzip sonar-scanner-cli-4.8.0.2856-linux.zip -d /opt
+                        export PATH=$PATH:/opt/sonar-scanner-4.8.0.2856-linux/bin
+                    else
+                        echo "SonarScanner already installed"
+                    fi
+                '''
             }
         }
 
@@ -50,14 +60,12 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                // Build the Node.js application
                 sh 'npm run build'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Build Docker image for the Node.js app
                 script {
                     sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
                 }
@@ -66,7 +74,6 @@ pipeline {
 
         stage('Push Docker Image to Docker Hub') {
             steps {
-                // Use Docker Hub credentials to log in and push the image
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PWD')]) {
                         sh 'echo $DOCKER_PWD | docker login -u $DOCKER_USERNAME --password-stdin'
@@ -79,7 +86,6 @@ pipeline {
 
     post {
         always {
-            // Clean up Docker images after the build
             sh 'docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true'
         }
         success {
