@@ -32,23 +32,6 @@ pipeline {
             }
         }
 
-        stage('Install SonarScanner') {
-            steps {
-                // Install SonarScanner if it's not already installed
-                sh '''
-                    if ! command -v sonar-scanner &> /dev/null
-                    then
-                        echo "SonarScanner not found, installing..."
-                        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                        unzip sonar-scanner-cli-4.8.0.2856-linux.zip -d /opt
-                        export PATH=$PATH:/opt/sonar-scanner-4.8.0.2856-linux/bin
-                    else
-                        echo "SonarScanner already installed"
-                    fi
-                '''
-            }
-        }
-
         stage('Static Code Analysis (SonarQube)') {
             steps {
                 script {
