@@ -26,22 +26,6 @@ pipeline {
             }
         }
 
-        stage('Install SonarScanner') {
-            steps {
-                sh '''
-                    if ! command -v sonar-scanner &> /dev/null
-                    then
-                        echo "SonarScanner not found, installing..."
-                        wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip
-                        unzip sonar-scanner-cli-4.8.0.2856-linux.zip -d /opt
-                        export PATH=$PATH:/opt/sonar-scanner-4.8.0.2856-linux/bin
-                    else
-                        echo "SonarScanner already installed"
-                    fi
-                '''
-            }
-        }
-
         stage('Static Code Analysis (SonarQube)') {
             steps {
                 script {
@@ -66,9 +50,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
-                }
+                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
             }
         }
 
@@ -86,7 +68,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true'
+            sh "docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true"
         }
         success {
             echo 'Build succeeded and image pushed to Docker Hub!'
