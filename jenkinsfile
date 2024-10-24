@@ -5,7 +5,6 @@ pipeline {
         IMAGE_NAME = 'devops317/mynodejs-application'
         GIT_REPO = 'https://github.com/ShahzaibInnovation/mynodejs-application.git'
         SONAR_URL = "http://192.168.43.90:9000"
-        SONAR_SCANNER_PATH = '/opt/sonar-scanner/bin' // Path to SonarScanner
     }
 
     stages {
@@ -30,17 +29,17 @@ pipeline {
         stage('Static Code Analysis (SonarQube)') {
             steps {
                 script {
-                    // Update PATH for SonarScanner
-                    env.PATH = "${SONAR_SCANNER_PATH}:${env.PATH}"
-
+                    // Use the Sonar Scanner defined in Jenkins
+                    def scannerHome = tool 'Sonar' // Referencing the Sonar tool configured in Jenkins
+                    
                     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                        sh '''
-                            sonar-scanner \
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=my-nodejs-app \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=${SONAR_URL} \
                             -Dsonar.login=$SONAR_AUTH_TOKEN
-                        '''
+                        """
                     }
                 }
             }
