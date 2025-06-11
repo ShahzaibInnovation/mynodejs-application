@@ -9,7 +9,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Awesome webpage is live on http://localhost:${port}`);
 });
 
